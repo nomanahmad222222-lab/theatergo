@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Theater Go — অ্যাডমিন প্যানেল</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--accent:#e8c547;--accent2:#ff6b35;--text:#f0ece0;--text2:#9a9688;--danger:#e84747;--success:#47e870;--radius:10px;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;}
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;background:rgba(10,10,15,0.98);border-bottom:1px solid rgba(255,255,255,.07);}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--accent);}
+  .logo span{color:var(--accent2);}
+  .logo sub{font-family:'Barlow',sans-serif;font-size:10px;letter-spacing:2px;color:var(--text2);font-weight:600;margin-left:6px;text-transform:uppercase;vertical-align:middle;}
+  .btn-back{background:transparent;color:var(--text2);border:1.5px solid rgba(255,255,255,.15);padding:7px 16px;border-radius:7px;font-size:12px;font-weight:600;letter-spacing:1px;cursor:pointer;text-decoration:none;text-transform:uppercase;transition:all .2s;}
+  .btn-back:hover{color:var(--accent);border-color:var(--accent);}
+  .admin-wrap{display:grid;grid-template-columns:220px 1fr;min-height:100vh;padding-top:58px;}
+  .sidebar{background:var(--bg2);border-right:1px solid rgba(255,255,255,.07);padding:24px 0;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;}
+  .sidebar-section{padding:0 16px 16px;}
+  .sidebar-label{font-size:10px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;font-weight:700;padding:0 8px 8px;margin-top:8px;display:block;}
+  .sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .2s;margin-bottom:2px;}
+  .sidebar-item:hover{background:var(--bg3);color:var(--text);}
+  .sidebar-item.active{background:rgba(232,197,71,.12);color:var(--accent);}
+  .sidebar-item .icon{font-size:16px;width:20px;text-align:center;}
+  .badge{background:var(--accent2);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:auto;}
+  .main{padding:28px 32px;overflow-x:hidden;}
+  .page-section{display:none;}.page-section.active{display:block;}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
+  .stat-card{background:var(--bg2);border-radius:var(--radius);padding:20px;border:1px solid rgba(255,255,255,.06);}
+  .stat-card .s-label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);margin-bottom:8px;}
+  .stat-card .s-val{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:2px;line-height:1;}
+  .stat-card .s-sub{font-size:11px;color:var(--text2);margin-top:4px;}
+  .stat-card.accent .s-val{color:var(--accent);}
+  .stat-card.accent2 .s-val{color:var(--accent2);}
+  .stat-card.success .s-val{color:var(--success);}
+  .sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+  .sec-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;}
+  .sec-title span{color:var(--accent);}
+  .btn{padding:9px 20px;border-radius:8px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;border:none;transition:opacity .2s;}
+  .btn-primary{background:var(--accent);color:#000;}.btn-primary:hover{opacity:.85;}
+  .btn-danger{background:var(--danger);color:#fff;}.btn-danger:hover{opacity:.85;}
+  .btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid rgba(255,255,255,.1);}.btn-ghost:hover{color:var(--text);}
+  .btn-sm{padding:6px 12px;font-size:11px;border-radius:6px;}
+  .table-wrap{background:var(--bg2);border-radius:var(--radius);border:1px solid rgba(255,255,255,.06);overflow:hidden;}
+  .table-toolbar{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;}
+  .search-input{background:var(--bg3);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:8px 14px;border-radius:7px;font-family:'Barlow',sans-serif;font-size:13px;flex:1;outline:none;transition:border-color .2s;}
+  .search-input:focus{border-color:var(--accent);}
+  .search-input::placeholder{color:var(--text2);}
+  table{width:100%;border-collapse:collapse;}
+  thead{background:var(--bg3);}
+  th{padding:12px 16px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);font-weight:700;white-space:nowrap;}
+  td{padding:14px 16px;font-size:13px;border-top:1px solid rgba(255,255,255,.05);vertical-align:middle;}
+  tr:hover td{background:rgba(255,255,255,.02);}
+  .movie-name-cell{font-weight:600;}
+  .movie-genre-tag{background:rgba(232,197,71,.1);color:var(--accent);font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;letter-spacing:.5px;}
+  .status-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;letter-spacing:.5px;}
+  .status-active{background:rgba(71,232,112,.12);color:var(--success);}
+  .status-inactive{background:rgba(232,71,71,.12);color:var(--danger);}
+  .action-btns{display:flex;gap:6px;}
+  .empty-row{text-align:center;color:var(--text2);font-size:13px;padding:40px !important;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .confirm-box{background:var(--bg2);border-radius:12px;border:1px solid rgba(255,255,255,.1);padding:28px 24px;max-width:380px;width:100%;text-align:center;}
+  .confirm-icon{font-size:36px;margin-bottom:12px;}
+  .confirm-text{font-size:15px;font-weight:600;margin-bottom:6px;}
+  .confirm-sub{font-size:13px;color:var(--text2);margin-bottom:24px;}
+  .confirm-btns{display:flex;gap:10px;justify-content:center;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .form-group{display:flex;flex-direction:column;gap:6px;}
+  .form-group.full{grid-column:1/-1;}
+  label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2);font-weight:700;}
+  input,select,textarea{background:var(--bg3);border:1.5px solid rgba(255,255,255,.1);color:var(--text);padding:10px 14px;border-radius:8px;font-family:'Barlow',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+  input::placeholder,textarea::placeholder{color:var(--text2);}
+  textarea{resize:vertical;min-height:80px;}
+  select option{background:var(--bg3);}
+  .toast{position:fixed;bottom:28px;right:28px;z-index:999;padding:13px 20px;border-radius:10px;font-size:13px;font-weight:600;display:none;align-items:center;gap:10px;animation:slideUp .3s ease;}
+  .toast.show{display:flex;}
+  .toast-success{background:#1a3a22;border:1px solid rgba(71,232,112,.3);color:var(--success);}
+  .toast-error{background:#3a1a1a;border:1px solid rgba(232,71,71,.3);color:var(--danger);}
+  .fb-status{font-size:11px;padding:3px 10px;border-radius:10px;font-weight:600;}
+  .fb-online{background:rgba(71,232,112,.12);color:var(--success);}
+  .fb-offline{background:rgba(232,71,71,.12);color:var(--danger);}
+  @keyframes slideUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:900px){
+    .admin-wrap{grid-template-columns:1fr;}
+    .sidebar{position:relative;height:auto;display:flex;flex-wrap:wrap;gap:4px;padding:12px 16px;}
+    .stats-grid{grid-template-columns:1fr 1fr;}
+    .main{padding:20px 16px;}
+    .form-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">THEATER<span>GO</span><sub>Admin</sub></div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span class="fb-status fb-offline" id="fbStatus">⏳ কানেক্ট হচ্ছে...</span>
+    <a class="btn-back" href="index.html">← মেইন সাইট</a>
+  </div>
+</nav>
+
+<div class="admin-wrap">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <span class="sidebar-label">মেনু</span>
+      <div class="sidebar-item active" id="tab-btn-dashboard" onclick="switchTab('dashboard',this)">
+        <span class="icon">📊</span> ড্যাশবোর্ড
+      </div>
+      <div class="sidebar-item" id="tab-btn-movies" onclick="switchTab('movies',this)">
+        <span class="icon">🎬</span> মুভি ম্যানেজ
+        <span class="badge" id="movieCount">0</span>
+      </div>
+      <div class="sidebar-item" id="tab-btn-add" onclick="switchTab('add',this)">
+        <span class="icon">➕</span> নতুন যোগ করুন
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <span class="sidebar-label">সেটিংস</span>
+      <div class="sidebar-item" id="tab-btn-settings" onclick="switchTab('settings',this)">
+        <span class="icon">⚙️</span> সাধারণ সেটিং
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page-section active" id="tab-dashboard">
+      <div class="sec-header">
+        <div class="sec-title">ড্যাশ<span>বোর্ড</span></div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card accent"><div class="s-label">মোট মুভি</div><div class="s-val" id="statTotal">—</div><div class="s-sub">সব কন্টেন্ট</div></div>
+        <div class="stat-card success"><div class="s-label">সক্রিয়</div><div class="s-val" id="statActive">—</div><div class="s-sub">পাবলিশড</div></div>
+        <div class="stat-card accent2"><div class="s-label">মোট ভিউ</div><div class="s-val" id="statViews">—</div><div class="s-sub">সব মিলিয়ে</div></div>
+        <div class="stat-card"><div class="s-label">নিষ্ক্রিয়</div><div class="s-val" id="statInactive">—</div><div class="s-sub">লুকানো কন্টেন্ট</div></div>
+      </div>
+      <div class="sec-header">
+        <div class="sec-title">সাম্প্রতিক <span>কন্টেন্ট</span></div>
+        <button class="btn btn-primary" onclick="switchTab('add',document.getElementById('tab-btn-add'))">+ নতুন যোগ করুন</button>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr><th>শিরোনাম</th><th>ধরন</th><th>রেটিং</th><th>ভিউ</th><th>স্ট্যাটাস</th></tr></thead>
+        <tbody id="dashboardTable"></tbody></table>
+      </div>
+    </div>
+
+    <!-- MOVIES LIST -->
+    <div class="page-section" id="tab-movies">
+      <div class="sec-header">
+        <div class="sec-title">মুভি <span>ম্যানেজ</span></div>
+        <button class="btn btn-primary" onclick="switchTab('add',document.getElementById('tab-btn-add'))">+ নতুন যোগ করুন</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input type="text" class="search-input" placeholder="শিরোনাম বা পরিচালক খুঁজুন..." id="searchInput" oninput="renderMoviesTable()">
+          <select id="filterStatus" onchange="renderMoviesTable()" style="width:130px;">
+            <option value="">সব</option><option value="active">সক্রিয়</option><option value="inactive">নিষ্ক্রিয়</option>
+          </select>
+        </div>
+        <table><thead><tr><th>#</th><th>শিরোনাম</th><th>ধরন</th><th>সময়</th><th>রেটিং</th><th>ভিউ</th><th>স্ট্যাটাস</th><th>অ্যাকশন</th></tr></thead>
+        <tbody id="moviesTable"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ADD / EDIT -->
+    <div class="page-section" id="tab-add">
+      <div class="sec-header">
+        <div class="sec-title" id="formTitle">নতুন <span>যোগ করুন</span></div>
+      </div>
+      <div style="background:var(--bg2);border-radius:var(--radius);border:1px solid rgba(255,255,255,.06);padding:28px;">
+        <div class="form-grid">
+          <div class="form-group"><label>শিরোনাম *</label><input type="text" id="f-title" placeholder="মুভির নাম"></div>
+          <div class="form-group"><label>ধরন *</label>
+            <select id="f-genre">
+              <option value="action">অ্যাকশন</option><option value="drama">ড্রামা</option>
+              <option value="short">শর্ট ফিল্ম</option><option value="thriller">থ্রিলার</option>
+              <option value="romance">রোমান্স</option><option value="comedy">কমেডি</option>
+            </select>
+          </div>
+          <div class="form-group"><label>সময়কাল</label><input type="text" id="f-duration" placeholder="যেমন: ১ঘ ৪৫মি"></div>
+          <div class="form-group"><label>বছর</label><input type="text" id="f-year" placeholder="যেমন: ২০২৪"></div>
+          <div class="form-group"><label>পরিচালক</label><input type="text" id="f-director" placeholder="পরিচালকের নাম"></div>
+          <div class="form-group"><label>রেটিং (১–১০)</label><input type="text" id="f-rating" placeholder="যেমন: ৮.৫"></div>
+          <div class="form-group full"><label>অভিনেতা/অভিনেত্রী</label><input type="text" id="f-cast" placeholder="কমা দিয়ে আলাদা করুন: রিয়াজ, মৌসুমী, ফেরদৌস"></div>
+          <div class="form-group full"><label>ভিডিও URL</label><input type="text" id="f-url" placeholder="https://... (MP4 বা ইউটিউব লিঙ্ক)"></div>
+          <div class="form-group full"><label>থাম্বনেইল URL</label><input type="text" id="f-thumb" placeholder="https://... (ছবির লিঙ্ক)"></div>
+          <div class="form-group full"><label>বর্ণনা</label><textarea id="f-desc" placeholder="মুভির সংক্ষিপ্ত বিবরণ লিখুন..."></textarea></div>
+          <div class="form-group"><label>স্ট্যাটাস</label>
+            <select id="f-status"><option value="active">সক্রিয় (পাবলিশড)</option><option value="inactive">নিষ্ক্রিয় (লুকানো)</option></select>
+          </div>
+        </div>
+        <input type="hidden" id="f-id">
+        <div style="margin-top:24px;display:flex;gap:12px;">
+          <button class="btn btn-primary" onclick="saveMovie()">💾 Firebase এ সেভ করুন</button>
+          <button class="btn btn-ghost" onclick="resetForm()">↺ রিসেট</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page-section" id="tab-settings">
+      <div class="sec-header"><div class="sec-title">সাধারণ <span>সেটিং</span></div></div>
+      <div style="background:var(--bg2);border-radius:var(--radius);border:1px solid rgba(255,255,255,.06);padding:28px;max-width:500px;">
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Firebase ডেটাবেস</div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">সব ডেটা Firebase Realtime DB তে সেভ আছে। নিচের বাটনে ক্লিক করলে sample ডেটায় ফিরে যাবে।</div>
+            <button class="btn btn-danger" onclick="resetAllData()">🗑️ ডেটা রিসেট করুন</button>
+          </div>
+          <hr style="border-color:rgba(255,255,255,.08);">
+          <div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:4px;">ডেটা এক্সপোর্ট</div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">বর্তমান সব মুভি ডেটা JSON ফরম্যাটে ডাউনলোড করুন।</div>
+            <button class="btn btn-ghost" onclick="exportData()">📥 JSON ডাউনলোড</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-text">মুছে ফেলবেন?</div>
+    <div class="confirm-sub" id="confirmSubText">এই মুভি Firebase থেকে স্থায়ীভাবে মুছে যাবে।</div>
+    <div class="confirm-btns">
+      <button class="btn btn-ghost" onclick="closeConfirm()">বাতিল</button>
+      <button class="btn btn-danger" id="confirmYesBtn">হ্যাঁ, মুছুন</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+// ── Firebase Config ──
+const firebaseConfig = {
+  apiKey: "AIzaSyALY1806HVwZQZn0axnRlukL-wIlbH6tYY",
+  authDomain: "theatergo-bdabf.firebaseapp.com",
+  databaseURL: "https://theatergo-bdabf-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "theatergo-bdabf",
+  storageBucket: "theatergo-bdabf.firebasestorage.app",
+  messagingSenderId: "934107705894",
+  appId: "1:934107705894:web:915c034c62e3d235062ce7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const moviesRef = ref(db, 'movies');
+
+const genreNames = {action:'অ্যাকশন',drama:'ড্রামা',short:'শর্ট ফিল্ম',thriller:'থ্রিলার',romance:'রোমান্স',comedy:'কমেডি'};
+
+const SAMPLE = [
+  {id:'m1',title:'দ্য লাস্ট শ্যাডো',genre:'thriller',duration:'১ঘ ৪৫মি',year:'২০২৪',director:'আরিফ হোসেন',cast:'রিয়াজ,মৌসুমী,ফেরদৌস',desc:'একটি রহস্যময় গোয়েন্দা এবং তার শেষ মিশনের গল্প।',url:'',status:'active',thumb:'',rating:'৮.৪',views:1240},
+  {id:'m2',title:'নীল আকাশের নিচে',genre:'drama',duration:'২৮মি',year:'২০২৪',director:'সুমন সরকার',cast:'মেহজাবিন,তাহসান',desc:'দুই বন্ধুর অসাধারণ বন্ধুত্বের গল্প।',url:'',status:'active',thumb:'',rating:'৯.১',views:890},
+  {id:'m3',title:'মুক্তির পথে',genre:'short',duration:'৩৫মি',year:'২০২৩',director:'কামরুল হাসান',cast:'মোশাররফ করিম,নুসরাত',desc:'স্বাধীনতার সংগ্রামে একজন তরুণের জীবনের টার্নিং পয়েন্ট।',url:'',status:'active',thumb:'',rating:'৯.৬',views:2100},
+  {id:'m4',title:'ঢাকার রাত',genre:'action',duration:'৫৮মি',year:'২০২৪',director:'হুমায়ূন ফরীদি',cast:'সিয়াম,পূজা',desc:'ঢাকার রাতের অন্ধকারে এক সাহসী পুলিশ অফিসারের গল্প।',url:'',status:'active',thumb:'',rating:'৭.৮',views:560},
+  {id:'m5',title:'প্রেমের খেলা',genre:'romance',duration:'৪২মি',year:'২০২৪',director:'নাজিমুদ্দিন',cast:'আফরান,মিথিলা',desc:'ডিজিটাল যুগে প্রেম এবং সম্পর্কের জটিলতা।',url:'',status:'active',thumb:'',rating:'৮.০',views:780},
+  {id:'m6',title:'হাসির ফাঁদ',genre:'comedy',duration:'৩২মি',year:'২০২৩',director:'মামুনুর রশীদ',cast:'চঞ্চল,বিদ্যা',desc:'গ্রাম-শহরের মিশেলে এক অসাধারণ কমেডি।',url:'',status:'active',thumb:'',rating:'৮.৫',views:345},
+  {id:'m7',title:'আলোর খোঁজে',genre:'short',duration:'১৮মি',year:'২০২৪',director:'ফারুক আহমেদ',cast:'জয়া,রাফি',desc:'একটি শিশুর চোখে দেখা পৃথিবীর গল্প।',url:'',status:'active',thumb:'',rating:'৯.৩',views:1560},
+];
+
+// ── Global state ──
+let allMovies = [];
+
+// ── Firebase: seed if empty, then listen ──
+get(moviesRef).then(snap => {
+  if (!snap.exists()) {
+    const obj = {};
+    SAMPLE.forEach(m => { obj[m.id] = m; });
+    set(moviesRef, obj).then(() => showToast('✅ Sample ডেটা Firebase এ লোড হয়েছে!'));
+  }
+});
+
+onValue(moviesRef, (snap) => {
+  allMovies = snap.exists() ? Object.values(snap.val()) : [];
+  document.getElementById('movieCount').textContent = allMovies.length;
+  document.getElementById('fbStatus').textContent = '🟢 Firebase সংযুক্ত';
+  document.getElementById('fbStatus').className = 'fb-status fb-online';
+  renderDashboard();
+  // যদি movies tab খোলা থাকে
+  if (document.getElementById('tab-movies').classList.contains('active')) renderMoviesTable();
+}, (err) => {
+  document.getElementById('fbStatus').textContent = '🔴 সংযোগ ব্যর্থ';
+  document.getElementById('fbStatus').className = 'fb-status fb-offline';
+});
+
+// ── Tabs ──
+window.switchTab = function(name, el) {
+  document.querySelectorAll('.page-section').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(x => x.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'movies') renderMoviesTable();
+  if (name === 'add' && !document.getElementById('f-id').value) resetForm();
+};
+
+// ── Dashboard ──
+function renderDashboard() {
+  const active = allMovies.filter(m => m.status === 'active');
+  const views = allMovies.reduce((s,m) => s+(m.views||0), 0);
+  document.getElementById('statTotal').textContent = allMovies.length;
+  document.getElementById('statActive').textContent = active.length;
+  document.getElementById('statViews').textContent = views.toLocaleString('en');
+  document.getElementById('statInactive').textContent = allMovies.length - active.length;
+  const recent = [...allMovies].reverse().slice(0, 7);
+  document.getElementById('dashboardTable').innerHTML = recent.length
+    ? recent.map(m => `<tr>
+        <td class="movie-name-cell">${m.title}</td>
+        <td><span class="movie-genre-tag">${genreNames[m.genre]||m.genre}</span></td>
+        <td style="color:var(--accent)">★ ${m.rating}</td>
+        <td>${(m.views||0).toLocaleString('en')}</td>
+        <td><span class="status-badge ${m.status==='active'?'status-active':'status-inactive'}">${m.status==='active'?'সক্রিয়':'নিষ্ক্রিয়'}</span></td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" class="empty-row">কোনো কন্টেন্ট নেই</td></tr>';
+}
+
+// ── Movies Table ──
+window.renderMoviesTable = function() {
+  const q = (document.getElementById('searchInput')?.value||'').toLowerCase();
+  const fs = document.getElementById('filterStatus')?.value||'';
+  let list = [...allMovies];
+  if (q) list = list.filter(m => m.title.toLowerCase().includes(q)||(m.director||'').toLowerCase().includes(q));
+  if (fs) list = list.filter(m => m.status===fs);
+  document.getElementById('moviesTable').innerHTML = list.length
+    ? list.map((m,i) => `<tr>
+        <td style="color:var(--text2)">${i+1}</td>
+        <td class="movie-name-cell">${m.title}</td>
+        <td><span class="movie-genre-tag">${genreNames[m.genre]||m.genre}</span></td>
+        <td style="color:var(--text2)">${m.duration}</td>
+        <td style="color:var(--accent)">★ ${m.rating}</td>
+        <td>${(m.views||0).toLocaleString('en')}</td>
+        <td><span class="status-badge ${m.status==='active'?'status-active':'status-inactive'}">${m.status==='active'?'সক্রিয়':'নিষ্ক্রিয়'}</span></td>
+        <td><div class="action-btns">
+          <button class="btn btn-ghost btn-sm" onclick="editMovie('${m.id}')">✏️ এডিট</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmDelete('${m.id}','${m.title.replace(/'/g,"\\'")}')">🗑️</button>
+        </div></td>
+      </tr>`).join('')
+    : '<tr><td colspan="8" class="empty-row">কোনো কন্টেন্ট নেই</td></tr>';
+};
+
+// ── Add / Edit ──
+window.resetForm = function() {
+  ['f-id','f-title','f-duration','f-year','f-director','f-rating','f-cast','f-url','f-thumb','f-desc'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('f-genre').value='action';
+  document.getElementById('f-status').value='active';
+  document.getElementById('formTitle').innerHTML='নতুন <span>যোগ করুন</span>';
+};
+
+window.editMovie = function(id) {
+  const m = allMovies.find(x => x.id===id);
+  if (!m) return;
+  document.getElementById('f-id').value = m.id;
+  document.getElementById('f-title').value = m.title;
+  document.getElementById('f-genre').value = m.genre;
+  document.getElementById('f-duration').value = m.duration;
+  document.getElementById('f-year').value = m.year;
+  document.getElementById('f-director').value = m.director||'';
+  document.getElementById('f-rating').value = m.rating;
+  document.getElementById('f-cast').value = m.cast||'';
+  document.getElementById('f-url').value = m.url||'';
+  document.getElementById('f-thumb').value = m.thumb||'';
+  document.getElementById('f-desc').value = m.desc||'';
+  document.getElementById('f-status').value = m.status||'active';
+  document.getElementById('formTitle').innerHTML='মুভি <span>এডিট করুন</span>';
+  switchTab('add', document.getElementById('tab-btn-add'));
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
+window.saveMovie = async function() {
+  const title = document.getElementById('f-title').value.trim();
+  if (!title) { showToast('শিরোনাম দেওয়া আবশ্যক!','error'); return; }
+  const id = document.getElementById('f-id').value || ('m'+Date.now());
+  const existing = allMovies.find(x => x.id===id);
+  const data = {
+    id,
+    title,
+    genre: document.getElementById('f-genre').value,
+    duration: document.getElementById('f-duration').value.trim()||'—',
+    year: document.getElementById('f-year').value.trim()||'২০২৪',
+    director: document.getElementById('f-director').value.trim(),
+    rating: document.getElementById('f-rating').value.trim()||'৭.০',
+    cast: document.getElementById('f-cast').value.trim(),
+    url: document.getElementById('f-url').value.trim(),
+    thumb: document.getElementById('f-thumb').value.trim(),
+    desc: document.getElementById('f-desc').value.trim(),
+    status: document.getElementById('f-status').value,
+    views: existing ? (existing.views||0) : 0,
+  };
+  try {
+    await set(ref(db, `movies/${id}`), data);
+    showToast(existing ? '✅ Firebase এ আপডেট হয়েছে!' : '✅ Firebase এ সেভ হয়েছে!');
+    resetForm();
+  } catch(e) {
+    showToast('❌ সেভ ব্যর্থ: '+e.message,'error');
+  }
+};
+
+// ── Delete ──
+let _deleteId = null;
+window.confirmDelete = function(id, title) {
+  _deleteId = id;
+  document.getElementById('confirmSubText').textContent = `"${title}" Firebase থেকে স্থায়ীভাবে মুছে যাবে।`;
+  document.getElementById('confirmModal').classList.add('open');
+  document.getElementById('confirmYesBtn').onclick = async () => {
+    try {
+      await remove(ref(db, `movies/${_deleteId}`));
+      showToast('🗑️ Firebase থেকে মুছে ফেলা হয়েছে।');
+    } catch(e) {
+      showToast('❌ ডিলিট ব্যর্থ','error');
+    }
+    closeConfirm();
+  };
+};
+window.closeConfirm = function() { document.getElementById('confirmModal').classList.remove('open'); };
+document.getElementById('confirmModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeConfirm(); });
+
+// ── Settings ──
+window.resetAllData = async function() {
+  if (!confirm('সত্যিই সব ডেটা রিসেট করবেন? সব মুভি মুছে sample ডেটা আসবে।')) return;
+  const obj = {};
+  SAMPLE.forEach(m => { obj[m.id]=m; });
+  await set(moviesRef, obj);
+  showToast('🔄 Firebase ডেটা রিসেট হয়েছে।');
+};
+window.exportData = function() {
+  const blob = new Blob([JSON.stringify(allMovies,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'theatergo_movies.json';
+  a.click();
+};
+
+// ── Toast ──
+let _tt;
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast show toast-${type}`;
+  clearTimeout(_tt);
+  _tt = setTimeout(()=>t.classList.remove('show'), 3500);
+}
+window.showToast = showToast;
+
+</script>
+</body>
+</html>

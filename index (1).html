@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Theater Go</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;
+    --accent:#e8c547;--accent2:#ff6b35;
+    --text:#f0ece0;--text2:#9a9688;
+    --card-w:160px;--card-h:240px;--radius:10px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;}
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(10,10,15,0.98),transparent);}
+  .logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;color:var(--accent);cursor:pointer;}
+  .logo span{color:var(--accent2);}
+  nav .nav-links{display:flex;gap:24px;align-items:center;}
+  nav a{color:var(--text2);text-decoration:none;font-size:14px;font-weight:500;letter-spacing:1px;text-transform:uppercase;transition:color .2s;cursor:pointer;}
+  nav a:hover,nav a.active{color:var(--accent);}
+  .btn-admin{background:var(--accent);color:#000;padding:8px 18px;border-radius:6px;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:opacity .2s;}
+  .btn-admin:hover{opacity:.85;color:#000;}
+  .page{display:none;}.page.active{display:block;}
+  .hero{position:relative;height:480px;overflow:hidden;margin-bottom:40px;}
+  .hero-slides{display:flex;width:100%;height:100%;transition:transform .5s ease;}
+  .hero-slide{min-width:100%;height:100%;position:relative;flex-shrink:0;}
+  .hero-overlay{position:absolute;inset:0;background:linear-gradient(to right,rgba(10,10,15,.95) 35%,rgba(10,10,15,.2) 100%);}
+  .hero-content{position:absolute;bottom:60px;left:40px;max-width:420px;}
+  .hero-badge{display:inline-block;background:var(--accent2);color:#fff;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:4px;margin-bottom:12px;text-transform:uppercase;}
+  .hero-title{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;letter-spacing:2px;margin-bottom:12px;}
+  .hero-meta{font-size:13px;color:var(--text2);margin-bottom:16px;display:flex;gap:12px;align-items:center;}
+  .hero-desc{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:24px;}
+  .hero-actions{display:flex;gap:12px;}
+  .btn-play{background:var(--accent);color:#000;border:none;padding:12px 28px;border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:opacity .2s;}
+  .btn-play:hover{opacity:.85;}
+  .btn-outline{background:transparent;color:var(--text);border:1.5px solid rgba(240,236,224,.3);padding:12px 24px;border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:border-color .2s;}
+  .btn-outline:hover{border-color:var(--accent);color:var(--accent);}
+  .hero-dots{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:6px;}
+  .hero-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:background .2s,width .2s;}
+  .hero-dot.active{background:var(--accent);width:24px;border-radius:4px;}
+  .section{padding:0 24px 40px;}
+  .section-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:20px;}
+  .section-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;}
+  .section-title span{color:var(--accent);}
+  .see-all{font-size:12px;color:var(--text2);cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:color .2s;}
+  .see-all:hover{color:var(--accent);}
+  .cards-row{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;}
+  .cards-row::-webkit-scrollbar{display:none;}
+  .card-p{min-width:var(--card-w);width:var(--card-w);cursor:pointer;flex-shrink:0;}
+  .card-p-img{width:100%;height:var(--card-h);border-radius:var(--radius);background:var(--bg3);position:relative;overflow:hidden;transition:transform .3s;display:flex;align-items:center;justify-content:center;}
+  .card-p:hover .card-p-img{transform:scale(1.04);}
+  .card-p-img .placeholder-icon{font-size:40px;opacity:.2;}
+  .card-p-title{font-size:13px;font-weight:600;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .card-p-meta{font-size:11px;color:var(--text2);margin-top:2px;}
+  .card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8),transparent);opacity:0;transition:opacity .3s;display:flex;align-items:center;justify-content:center;}
+  .card-p:hover .card-overlay{opacity:1;}
+  .play-btn-sm{width:44px;height:44px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;}
+  .play-btn-sm svg{fill:#000;width:16px;height:16px;margin-left:3px;}
+  .cards-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .card-w{cursor:pointer;border-radius:var(--radius);overflow:hidden;background:var(--bg3);aspect-ratio:16/9;position:relative;}
+  .card-w:hover .card-overlay{opacity:1;}
+  .card-w .placeholder-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px;opacity:.15;}
+  .card-w-info{position:absolute;bottom:0;left:0;right:0;padding:16px;background:linear-gradient(to top,rgba(0,0,0,.9),transparent);}
+  .card-w-title{font-size:14px;font-weight:700;}
+  .card-w-meta{font-size:11px;color:var(--text2);margin-top:2px;}
+  #page-player{padding-top:70px;}
+  .player-wrap{max-width:900px;margin:0 auto;padding:0 24px 40px;}
+  .video-box{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;}
+  .video-box video{width:100%;height:100%;object-fit:cover;}
+  .video-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0d0d12;}
+  .video-placeholder p{font-size:13px;color:var(--text2);}
+  .play-big{width:72px;height:72px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .2s;}
+  .play-big:hover{transform:scale(1.08);}
+  .play-big svg{fill:#000;width:28px;height:28px;margin-left:5px;}
+  .video-controls{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 16px;background:var(--bg2);border-radius:10px;}
+  .progress-bar{flex:1;height:4px;background:rgba(255,255,255,.2);border-radius:2px;cursor:pointer;}
+  .progress-fill{height:100%;background:var(--accent);border-radius:2px;width:0%;}
+  .ctrl-btn{background:none;border:none;color:var(--text);cursor:pointer;font-size:18px;padding:4px;opacity:.7;transition:opacity .2s;}
+  .ctrl-btn:hover{opacity:1;color:var(--accent);}
+  .time-label{font-size:12px;color:var(--text2);font-family:monospace;}
+  .movie-info-wrap{display:grid;grid-template-columns:1fr 280px;gap:24px;margin-top:24px;}
+  .movie-title-big{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:2px;margin-bottom:8px;}
+  .movie-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .tag{background:rgba(232,197,71,.12);color:var(--accent);font-size:11px;padding:4px 12px;border-radius:20px;font-weight:600;letter-spacing:.5px;}
+  .movie-desc-full{font-size:14px;line-height:1.75;color:var(--text2);}
+  .movie-stats{display:flex;gap:20px;margin:16px 0;}
+  .movie-stat span{display:block;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;}
+  .movie-stat strong{font-size:16px;font-weight:700;}
+  .cast-list{background:var(--bg2);border-radius:10px;padding:16px;}
+  .cast-title{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:12px;}
+  .cast-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .cast-avatar{width:36px;height:36px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0;}
+  .cast-name{font-size:13px;font-weight:600;}
+  .cast-role{font-size:11px;color:var(--text2);}
+  .related-section{margin-top:32px;}
+  .related-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:16px;}
+  .ads-banner{margin:0 24px 24px;background:var(--bg3);border-radius:var(--radius);padding:20px;text-align:center;border:1px dashed rgba(255,255,255,.1);}
+  .ads-banner p{font-size:11px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;}
+  .filter-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:20px;scrollbar-width:none;}
+  .filter-chips::-webkit-scrollbar{display:none;}
+  .chip{background:var(--bg3);border:1px solid rgba(255,255,255,.1);color:var(--text2);padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;letter-spacing:.5px;flex-shrink:0;}
+  .chip:hover,.chip.active{background:var(--accent);border-color:var(--accent);color:#000;}
+  .back-btn{display:inline-flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid rgba(255,255,255,.1);color:var(--text2);padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;margin-bottom:20px;transition:all .2s;}
+  .back-btn:hover{color:var(--accent);border-color:var(--accent);}
+  .loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px;transition:opacity .4s;}
+  .loading-screen.hide{opacity:0;pointer-events:none;}
+  .loading-logo{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:4px;color:var(--accent);}
+  .loading-logo span{color:var(--accent2);}
+  .spinner{width:36px;height:36px;border:3px solid rgba(232,197,71,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+  .loading-txt{font-size:12px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @media(max-width:768px){
+    .movie-info-wrap{grid-template-columns:1fr;}
+    .cards-grid-2{grid-template-columns:1fr;}
+    .hero-title{font-size:36px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">THEATER<span>GO</span></div>
+  <div class="spinner"></div>
+  <div class="loading-txt">ডেটা লোড হচ্ছে...</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo" onclick="showPage('home')">THEATER<span>GO</span></div>
+  <div class="nav-links">
+    <a onclick="showPage('home');setGenre('all')" class="active">হোম</a>
+    <a onclick="showPage('home');setGenre('action')">অ্যাকশন</a>
+    <a onclick="showPage('home');setGenre('drama')">ড্রামা</a>
+    <a onclick="showPage('home');setGenre('short')">শর্ট ফিল্ম</a>
+    <a class="btn-admin" href="admin.html">⚙ অ্যাডমিন</a>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-slides" id="heroSlides">
+      <div class="hero-slide">
+        <div style="width:100%;height:100%;background:linear-gradient(135deg,#1a0a0a,#0a1520);"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-badge">🔥 ট্রেন্ডিং</div>
+          <div class="hero-title" id="h1t">লোড হচ্ছে...</div>
+          <div class="hero-meta" id="h1m"></div>
+          <div class="hero-desc" id="h1d"></div>
+          <div class="hero-actions">
+            <button class="btn-play" id="h1btn">▶ এখনই দেখুন</button>
+            <button class="btn-outline">+ ওয়াচলিস্ট</button>
+          </div>
+        </div>
+      </div>
+      <div class="hero-slide">
+        <div style="width:100%;height:100%;background:linear-gradient(135deg,#0a1a0a,#1a0a20);"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-badge" style="background:#7c6fff;">✨ নতুন</div>
+          <div class="hero-title" id="h2t">লোড হচ্ছে...</div>
+          <div class="hero-meta" id="h2m"></div>
+          <div class="hero-desc" id="h2d"></div>
+          <div class="hero-actions">
+            <button class="btn-play" id="h2btn">▶ এখনই দেখুন</button>
+            <button class="btn-outline">+ ওয়াচলিস্ট</button>
+          </div>
+        </div>
+      </div>
+      <div class="hero-slide">
+        <div style="width:100%;height:100%;background:linear-gradient(135deg,#1a1000,#0a0a1a);"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-badge" style="background:#4caf50;">🏆 পুরস্কারজয়ী</div>
+          <div class="hero-title" id="h3t">লোড হচ্ছে...</div>
+          <div class="hero-meta" id="h3m"></div>
+          <div class="hero-desc" id="h3d"></div>
+          <div class="hero-actions">
+            <button class="btn-play" id="h3btn">▶ এখনই দেখুন</button>
+            <button class="btn-outline">+ ওয়াচলিস্ট</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-dots">
+      <div class="hero-dot active" onclick="goSlide(0)"></div>
+      <div class="hero-dot" onclick="goSlide(1)"></div>
+      <div class="hero-dot" onclick="goSlide(2)"></div>
+    </div>
+  </div>
+
+  <div class="section" style="padding-bottom:16px;">
+    <div class="filter-chips" id="filterChips">
+      <div class="chip active" onclick="filterGenre('all',this)">সব</div>
+      <div class="chip" onclick="filterGenre('action',this)">অ্যাকশন</div>
+      <div class="chip" onclick="filterGenre('drama',this)">ড্রামা</div>
+      <div class="chip" onclick="filterGenre('short',this)">শর্ট ফিল্ম</div>
+      <div class="chip" onclick="filterGenre('thriller',this)">থ্রিলার</div>
+      <div class="chip" onclick="filterGenre('romance',this)">রোমান্স</div>
+      <div class="chip" onclick="filterGenre('comedy',this)">কমেডি</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">ট্রেন্ডিং <span>এখন</span></div>
+      <span class="see-all">সব দেখুন →</span>
+    </div>
+    <div class="cards-row" id="trendingRow"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">নতুন <span>রিলিজ</span></div>
+      <span class="see-all">সব দেখুন →</span>
+    </div>
+    <div class="cards-grid-2" id="newRow"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">শর্ট <span>ফিল্ম</span></div>
+      <span class="see-all">সব দেখুন →</span>
+    </div>
+    <div class="cards-row" id="shortRow"></div>
+  </div>
+
+  <div class="ads-banner">
+    <p>📢 বিজ্ঞাপন স্পেস — আপনার বিজ্ঞাপন দিন</p>
+  </div>
+</div>
+
+<!-- PLAYER PAGE -->
+<div class="page" id="page-player">
+  <div class="player-wrap">
+    <button class="back-btn" onclick="showPage('home')">← হোমে ফিরুন</button>
+    <div class="video-box" id="videoBox">
+      <div class="video-placeholder" id="videoPlaceholder">
+        <div class="play-big" onclick="togglePlay()">
+          <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+        </div>
+        <p id="videoTitle">ভিডিও লোড হচ্ছে...</p>
+      </div>
+      <video id="mainVideo" style="display:none;" controls></video>
+    </div>
+    <div class="video-controls">
+      <button class="ctrl-btn" id="playPauseBtn" onclick="togglePlay()">▶</button>
+      <span class="time-label" id="currentTime">0:00</span>
+      <div class="progress-bar" onclick="seekVideo(event)">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <span class="time-label" id="totalTime">0:00</span>
+      <button class="ctrl-btn" onclick="toggleMute()">🔊</button>
+      <button class="ctrl-btn" onclick="goFullscreen()">⛶</button>
+    </div>
+    <div class="movie-info-wrap">
+      <div>
+        <div class="movie-title-big" id="movieTitleBig">—</div>
+        <div class="movie-tags" id="movieTags"></div>
+        <div class="movie-stats" id="movieStats"></div>
+        <div class="movie-desc-full" id="movieDescFull">—</div>
+      </div>
+      <div>
+        <div class="cast-list" id="castList"></div>
+      </div>
+    </div>
+    <div class="related-section">
+      <div class="related-title">আরও দেখুন</div>
+      <div class="cards-row" id="relatedRow"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+// ── Firebase Config ──
+const firebaseConfig = {
+  apiKey: "AIzaSyALY1806HVwZQZn0axnRlukL-wIlbH6tYY",
+  authDomain: "theatergo-bdabf.firebaseapp.com",
+  databaseURL: "https://theatergo-bdabf-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "theatergo-bdabf",
+  storageBucket: "theatergo-bdabf.firebasestorage.app",
+  messagingSenderId: "934107705894",
+  appId: "1:934107705894:web:915c034c62e3d235062ce7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ── Helpers ──
+const genreNames = {action:'অ্যাকশন',drama:'ড্রামা',short:'শর্ট ফিল্ম',thriller:'থ্রিলার',romance:'রোমান্স',comedy:'কমেডি'};
+
+const SAMPLE = [
+  {id:'m1',title:'দ্য লাস্ট শ্যাডো',genre:'thriller',duration:'১ঘ ৪৫মি',year:'২০২৪',director:'আরিফ হোসেন',cast:'রিয়াজ,মৌসুমী,ফেরদৌস',desc:'একটি রহস্যময় গোয়েন্দা এবং তার শেষ মিশনের গল্প। সত্য ও মিথ্যার দ্বন্দ্বে এক থ্রিলিং যাত্রা।',url:'',status:'active',thumb:'',rating:'৮.৪',views:1240},
+  {id:'m2',title:'নীল আকাশের নিচে',genre:'drama',duration:'২৮মি',year:'২০২৪',director:'সুমন সরকার',cast:'মেহজাবিন,তাহসান',desc:'দুই বন্ধুর অসাধারণ বন্ধুত্বের গল্প।',url:'',status:'active',thumb:'',rating:'৯.১',views:890},
+  {id:'m3',title:'মুক্তির পথে',genre:'short',duration:'৩৫মি',year:'২০২৩',director:'কামরুল হাসান',cast:'মোশাররফ করিম,নুসরাত',desc:'স্বাধীনতার সংগ্রামে একজন তরুণের জীবনের টার্নিং পয়েন্ট।',url:'',status:'active',thumb:'',rating:'৯.৬',views:2100},
+  {id:'m4',title:'ঢাকার রাত',genre:'action',duration:'৫৮মি',year:'২০২৪',director:'হুমায়ূন ফরীদি',cast:'সিয়াম,পূজা',desc:'ঢাকার রাতের অন্ধকারে এক সাহসী পুলিশ অফিসারের গল্প।',url:'',status:'active',thumb:'',rating:'৭.৮',views:560},
+  {id:'m5',title:'প্রেমের খেলা',genre:'romance',duration:'৪২মি',year:'২০২৪',director:'নাজিমুদ্দিন',cast:'আফরান,মিথিলা',desc:'ডিজিটাল যুগে প্রেম এবং সম্পর্কের জটিলতা।',url:'',status:'active',thumb:'',rating:'৮.০',views:780},
+  {id:'m6',title:'হাসির ফাঁদ',genre:'comedy',duration:'৩২মি',year:'২০২৩',director:'মামুনুর রশীদ',cast:'চঞ্চল,বিদ্যা',desc:'গ্রাম-শহরের মিশেলে এক অসাধারণ কমেডি।',url:'',status:'active',thumb:'',rating:'৮.৫',views:345},
+  {id:'m7',title:'আলোর খোঁজে',genre:'short',duration:'১৮মি',year:'২০২৪',director:'ফারুক আহমেদ',cast:'জয়া,রাফি',desc:'একটি শিশুর চোখে দেখা পৃথিবীর গল্প।',url:'',status:'active',thumb:'',rating:'৯.৩',views:1560},
+];
+
+function getCardBg(g){return{action:'linear-gradient(135deg,#1a0800,#2a1000)',drama:'linear-gradient(135deg,#0a0820,#120a2a)',short:'linear-gradient(135deg,#001a08,#002a10)',thriller:'linear-gradient(135deg,#1a1400,#2a2000)',romance:'linear-gradient(135deg,#1a0010,#2a0018)',comedy:'linear-gradient(135deg,#001a1a,#002a2a)'}[g]||'#1a1a24';}
+function getEmoji(g){return{action:'⚔️',drama:'🎭',short:'🎬',thriller:'🔍',romance:'💕',comedy:'😄'}[g]||'🎥';}
+
+// ── Global movie cache (real-time) ──
+let allMovies = [];
+
+// ── Firebase: seed sample data if empty, then listen ──
+const moviesRef = ref(db, 'movies');
+
+get(moviesRef).then(snap => {
+  if (!snap.exists()) {
+    // প্রথমবার: sample data Firebase এ লিখি
+    const obj = {};
+    SAMPLE.forEach(m => { obj[m.id] = m; });
+    set(moviesRef, obj);
+  }
+});
+
+// Real-time listener — admin থেকে কিছু বদলালেই এখানে আপডেট হবে
+onValue(moviesRef, (snap) => {
+  if (snap.exists()) {
+    allMovies = Object.values(snap.val());
+  } else {
+    allMovies = [];
+  }
+  document.getElementById('loadingScreen').classList.add('hide');
+  renderHome();
+});
+
+// ── Pages ──
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  if (p === 'home') renderHome();
+}
+window.showPage = showPage;
+
+// ── Genre filter ──
+let currentGenre = 'all';
+function setGenre(g) { currentGenre = g; renderHome(); }
+window.setGenre = setGenre;
+
+function filterGenre(g, el) {
+  currentGenre = g;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderHome();
+}
+window.filterGenre = filterGenre;
+
+// ── Hero Slider ──
+let slide = 0;
+function goSlide(n) {
+  slide = n;
+  document.getElementById('heroSlides').style.transform = `translateX(-${n*100}%)`;
+  document.querySelectorAll('.hero-dot').forEach((d,i) => d.classList.toggle('active', i===n));
+}
+window.goSlide = goSlide;
+setInterval(() => goSlide((slide+1)%3), 5000);
+
+function populateHero() {
+  const movies = allMovies.filter(m => m.status === 'active');
+  const slots = [{t:'h1t',m:'h1m',d:'h1d',btn:'h1btn'},{t:'h2t',m:'h2m',d:'h2d',btn:'h2btn'},{t:'h3t',m:'h3m',d:'h3d',btn:'h3btn'}];
+  slots.forEach((s, i) => {
+    const mv = movies[i];
+    if (!mv) return;
+    document.getElementById(s.t).textContent = mv.title;
+    document.getElementById(s.m).innerHTML = `<span>${mv.year}</span><span style="opacity:.4">|</span><span>${mv.duration}</span><span style="opacity:.4">|</span><span style="color:var(--accent)">★ ${mv.rating}</span>`;
+    document.getElementById(s.d).textContent = mv.desc.substring(0,100)+'...';
+    document.getElementById(s.btn).onclick = () => playMovie(mv.id);
+  });
+}
+
+// ── Render cards ──
+function renderPortrait(id, list) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!list.length) { el.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:20px;">কোনো কন্টেন্ট নেই</div>'; return; }
+  el.innerHTML = list.map(m => `
+    <div class="card-p" onclick="playMovie('${m.id}')">
+      <div class="card-p-img" style="background:${getCardBg(m.genre)}">
+        ${m.thumb?`<img src="${m.thumb}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius)">`:`<span class="placeholder-icon">${getEmoji(m.genre)}</span>`}
+        <div class="card-overlay"><div class="play-btn-sm"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div></div>
+      </div>
+      <div class="card-p-title">${m.title}</div>
+      <div class="card-p-meta">${m.duration} • <span style="color:var(--accent)">★ ${m.rating}</span></div>
+    </div>`).join('');
+}
+
+function renderWide(id, list) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!list.length) { el.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:20px;">কোনো কন্টেন্ট নেই</div>'; return; }
+  el.innerHTML = list.map(m => `
+    <div class="card-w" onclick="playMovie('${m.id}')" style="background:${getCardBg(m.genre)}">
+      <div class="placeholder-icon">${getEmoji(m.genre)}</div>
+      ${m.thumb?`<img src="${m.thumb}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">`:''}
+      <div class="card-overlay"></div>
+      <div class="card-w-info">
+        <div class="card-w-title">${m.title}</div>
+        <div class="card-w-meta">${genreNames[m.genre]||m.genre} • ${m.duration} • ★ ${m.rating}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderHome() {
+  const active = allMovies.filter(m => m.status === 'active');
+  const filtered = currentGenre === 'all' ? active : active.filter(m => m.genre === currentGenre);
+  renderPortrait('trendingRow', filtered.slice(0,8));
+  renderWide('newRow', filtered.slice(0,4));
+  renderPortrait('shortRow', active.filter(m => m.genre === 'short').slice(0,8));
+  populateHero();
+}
+
+// ── Player ──
+let currentMovieId = null;
+async function playMovie(id) {
+  const m = allMovies.find(x => x.id === id);
+  if (!m) return;
+  // views বাড়ানো
+  const updated = {...m, views: (m.views||0)+1};
+  set(ref(db, `movies/${id}`), updated);
+
+  currentMovieId = id;
+  showPage('player');
+  document.getElementById('videoTitle').textContent = m.title;
+  document.getElementById('movieTitleBig').textContent = m.title;
+  document.getElementById('movieTags').innerHTML = [genreNames[m.genre]||m.genre, m.year, m.duration].map(t=>`<span class="tag">${t}</span>`).join('');
+  document.getElementById('movieStats').innerHTML = `
+    <div class="movie-stat"><span>রেটিং</span><strong style="color:var(--accent)">★ ${m.rating}</strong></div>
+    <div class="movie-stat"><span>সময়</span><strong>${m.duration}</strong></div>
+    <div class="movie-stat"><span>পরিচালক</span><strong>${m.director||'অজানা'}</strong></div>`;
+  document.getElementById('movieDescFull').textContent = m.desc;
+  const castArr = (m.cast||'').split(',').filter(Boolean);
+  document.getElementById('castList').innerHTML = `<div class="cast-title">অভিনেতা-অভিনেত্রী</div>`+
+    castArr.map(c=>`<div class="cast-item"><div class="cast-avatar">${c.trim()[0]||'?'}</div><div><div class="cast-name">${c.trim()}</div><div class="cast-role">অভিনেতা/অভিনেত্রী</div></div></div>`).join('');
+  renderPortrait('relatedRow', allMovies.filter(x=>x.id!==id&&x.genre===m.genre).slice(0,6));
+  const vid = document.getElementById('mainVideo');
+  const ph = document.getElementById('videoPlaceholder');
+  if (m.url) {
+    vid.src = m.url; vid.style.display='block'; ph.style.display='none';
+  } else {
+    vid.style.display='none'; ph.style.display='flex';
+    ph.querySelector('p').textContent = m.title+' — ভিডিও ফাইল যোগ করা হয়নি';
+  }
+}
+window.playMovie = playMovie;
+
+function togglePlay(){const vid=document.getElementById('mainVideo');if(vid.style.display==='none')return;vid.paused?vid.play():vid.pause();document.getElementById('playPauseBtn').textContent=vid.paused?'▶':'⏸';}
+function toggleMute(){document.getElementById('mainVideo').muted^=1;}
+function goFullscreen(){document.getElementById('videoBox').requestFullscreen&&document.getElementById('videoBox').requestFullscreen();}
+function seekVideo(e){const vid=document.getElementById('mainVideo');if(vid.duration)vid.currentTime=(e.offsetX/e.currentTarget.offsetWidth)*vid.duration;}
+window.togglePlay=togglePlay;window.toggleMute=toggleMute;window.goFullscreen=goFullscreen;window.seekVideo=seekVideo;
+
+document.getElementById('mainVideo').addEventListener('timeupdate',function(){
+  if(!this.duration)return;
+  document.getElementById('progressFill').style.width=(this.currentTime/this.duration*100)+'%';
+  document.getElementById('currentTime').textContent=fmt(this.currentTime);
+  document.getElementById('totalTime').textContent=fmt(this.duration);
+});
+function fmt(s){const m=Math.floor(s/60),sc=Math.floor(s%60);return m+':'+(sc<10?'0':'')+sc;}
+
+</script>
+</body>
+</html>
